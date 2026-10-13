@@ -1,0 +1,74 @@
+# =============================================================================
+# Build otomatis untuk GitHub Pages
+# -----------------------------------------------------------------------------
+# Setiap kali ada push ke branch `main` (atau dijalankan manual lewat tombol
+# "Run workflow"), GitHub Actions akan:
+#   1. meng-install dependensi,
+#   2. menjalankan `npm run build`,
+#   3. menyalin hasilnya (dist/index.html) ke folder docs/,
+#   4. meng-commit folder docs/ kembali ke repository.
+#
+# Kenapa folder docs/? Karena situs ini dipublikasikan dengan mode
+# "Deploy from a branch → main → / (root)", sehingga apa pun yang ada di dalam
+# repository bisa diakses publik, termasuk docs/index.html.
+# Hasilnya: https://miftahulanam95.github.io/eco-sort/docs/ selalu berisi versi
+# terbaru tanpa perlu menjalankan `npm install` atau `npm run build` di komputer
+# mana pun. file index.html di root akan mengarahkan pengunjung ke folder itu.
+# =============================================================================
+
+name: Build & Publish GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build & simpan ke docs/
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ambil kode terbaru
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependensi
+        run: npm ci
+
+      - name: Build aplikasi
+        run: npm run build
+
+      - name: Salin hasil build ke folder docs/
+        run: |
+          mkdir -p docs
+          cp dist/index.html docs/index.html
+          echo "Ukuran hasil build:"
+          du -h docs/index.html
+
+      - name: Commit & push docs/ bila ada perubahan
+        run: |
+          if [ -z "$(git status --porcelain docs)" ]; then
+            echo "Hasil build tidak berubah, tidak ada yang perlu di-commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html
+          git commit -m "build: perbarui hasil build GitHub Pages [skip ci]"
+          git push origin HEAD:main

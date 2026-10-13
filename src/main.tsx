@@ -49,6 +49,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryS
               <ol>
                 <li>Untuk pengembangan, jalankan <code>npm install</code> lalu <code>npm run dev</code>.</li>
                 <li>Untuk file siap pakai, jalankan <code>npm run build</code> lalu buka <code>dist/index.html</code>.</li>
+                <li>Versi online yang selalu terbaru ada di folder <code>docs/</code>.</li>
               </ol>
             </details>
           </div>

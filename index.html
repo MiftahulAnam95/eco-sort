@@ -40,28 +40,53 @@
         border-radius: 24px;
         background: rgba(255, 255, 255, .92);
         box-shadow: 0 18px 55px rgba(32, 43, 39, .09);
+        text-align: center;
       }
       .boot-mark {
         display: grid;
         width: 48px;
         height: 48px;
+        margin: 0 auto;
         place-items: center;
         border-radius: 15px;
         background: #176747;
         color: #d7f36a;
         font-size: 25px;
       }
-      .boot-card h1 { margin: 18px 0 8px; font-size: 24px; letter-spacing: -.04em; }
+      .boot-card h1 { margin: 18px 0 8px; font-size: 24px; letter-spacing: -.04em; text-align: center; }
       .boot-card p, .boot-card li { color: #59665f; line-height: 1.6; }
-      .boot-card p { margin: 0; }
-      .boot-card details { margin-top: 18px; padding-top: 16px; border-top: 1px solid #e4eae5; }
+      .boot-card p { margin: 0; text-align: center; }
+      .boot-card details { margin-top: 18px; padding-top: 16px; border-top: 1px solid #e4eae5; text-align: left; }
       .boot-card summary { color: #176747; font-weight: 700; cursor: pointer; }
       .boot-card ol { padding-left: 22px; margin-bottom: 0; }
       .boot-card code { padding: 2px 5px; border-radius: 5px; background: #eff2ec; color: #202b27; }
+      .boot-card a { color: #176747; }
+      /* Baris kemajuan kecil supaya layar awal terasa hidup. */
+      .boot-bar {
+        width: 168px;
+        height: 5px;
+        margin: 20px auto 0;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e4eae5;
+      }
+      .boot-bar span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 999px;
+        background: #176747;
+      }
       @media (prefers-reduced-motion: no-preference) {
         .boot-mark { animation: boot-bob 1.4s ease-in-out infinite alternate; }
+        .boot-bar span { animation: boot-slide 1.25s ease-in-out infinite; }
         @keyframes boot-bob { to { transform: translateY(-4px); } }
+        @keyframes boot-slide {
+          0% { transform: translateX(-110%); }
+          100% { transform: translateX(360%); }
+        }
       }
+      [hidden] { display: none !important; }
     </style>
   </head>
   <body>
@@ -70,12 +95,20 @@
         <div class="boot-card">
           <div class="boot-mark" aria-hidden="true">♻</div>
           <h1>EcoSort sedang dimuat</h1>
-          <p>Jangan buka file sumber ini langsung dengan <code>file://</code> atau Live Server. React dan TypeScript perlu dikompilasi terlebih dahulu. Jika layar ini tidak berubah, ikuti langkah berikut:</p>
-          <details open>
-            <summary>Cara membuka EcoSort</summary>
+          <p>Menyiapkan permainan, sebentar ya…</p>
+          <div class="boot-bar" aria-hidden="true"><span></span></div>
+
+          <!--
+            Petunjuk ini hanya muncul bila aplikasi benar-benar gagal dimuat
+            (misalnya file sumber index.html dibuka langsung tanpa build).
+            Saat berjalan normal, React menggantikan seluruh blok ini.
+          -->
+          <details id="boot-help" hidden>
+            <summary>EcoSort belum tampil? Buka versi siap pakai</summary>
             <ol>
               <li>Untuk pengembangan, jalankan <code>npm install</code> lalu <code>npm run dev</code>.</li>
               <li>Untuk file siap pakai, jalankan <code>npm run build</code> lalu buka <code>dist/index.html</code>.</li>
+              <li>Versi online selalu terbaru di <span id="boot-online-link">folder <code>docs/</code></span>.</li>
             </ol>
           </details>
         </div>
@@ -85,5 +118,36 @@
       </noscript>
     </div>
     <script type="module" src="./src/main.tsx"></script>
+    <script>
+      /* ----------------------------------------------------------------------
+         1) Bila halaman SUMBER ini dibuka dari GitHub Pages, langsung arahkan ke
+            hasil build di folder docs/ supaya pengunjung tidak melihat layar
+            "sedang dimuat" selamanya. Hasil build tidak punya skrip
+            src/main.tsx (sudah di-inline), jadi salinan build tidak redirect.
+         ---------------------------------------------------------------------- */
+      (function () {
+        var isSourceFile = !!document.querySelector('script[src*="src/main.tsx"]');
+
+        // Tautan ke versi online hanya masuk akal dari file sumber.
+        if (isSourceFile) {
+          var slot = document.getElementById("boot-online-link");
+          if (slot) slot.innerHTML = '<a href="docs/">hasil build EcoSort</a>';
+        }
+
+        if (isSourceFile && location.hostname.endsWith(".github.io")) {
+          location.replace("docs/");
+        }
+      })();
+
+      /* ----------------------------------------------------------------------
+         2) Bila setelah 4 detik React belum mengambil alih #root, tampilkan
+            petunjuk singkat (umumnya karena file dibuka tanpa build).
+         ---------------------------------------------------------------------- */
+      setTimeout(function () {
+        var boot = document.querySelector("#root .boot-screen");
+        var help = document.getElementById("boot-help");
+        if (boot && help) help.hidden = false;
+      }, 4000);
+    </script>
   </body>
 </html>

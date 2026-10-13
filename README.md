@@ -1,5 +1,19 @@
 # ♻️ EcoSort — Smart Waste Sorting Game
 
+## 🔗 Buka langsung (tanpa install apa pun)
+
+**https://miftahulanam95.github.io/eco-sort/**
+
+Link itu otomatis mengarah ke versi aplikasi yang sudah jadi
+(`https://miftahulanam95.github.io/eco-sort/docs/`). Cukup kirim link-nya — penerima
+langsung melihat game-nya, tidak perlu `npm install`, `npm run dev`, atau `npm run build`.
+
+> Setiap kali ada perubahan yang di-push ke branch `main`, GitHub Actions mem-build ulang
+> aplikasi dan memperbarui folder `docs/` secara otomatis. Jadi link di atas **selalu versi
+> terbaru**. Lihat [bagian 8](#8-deploy-ke-github-pages).
+
+---
+
 > **“Sort It Right, Keep Earth Bright!”**
 
 EcoSort adalah game edukasi interaktif untuk belajar memilah sampah: pemain melihat satu sampah,
@@ -97,8 +111,12 @@ ecosort/
 │   │   ├── AchievementsPage.tsx  # papan pencapaian + riwayat ronde
 │   │   └── SettingsPage.tsx      # pengaturan + data + reset
 │   └── utils/cn.ts               # penggabungan className
+├── docs/
+│   └── index.html                # salinan hasil build yang DIPUBLIKASIKAN GitHub Pages
+├── .github/workflows/
+│   └── deploy-pages.yml          # build otomatis + commit docs/ setiap push ke main
 └── dist/
-    └── index.html                # hasil build: SATU file statis siap GitHub Pages
+    └── index.html                # hasil build lokal (satu file statis, tidak di-commit)
 ```
 
 ### Pemetaan ke struktur vanilla (bila dosen mewajibkan tanpa framework)
@@ -120,7 +138,11 @@ dipisah ke file berbeda sehingga mudah dipindahkan ke versi HTML/CSS/JS murni.
 
 ## 3. Cara Menjalankan
 
-> **Penting:** jangan membuka `index.html` di folder proyek langsung lewat `file://` atau VS Code Live Server. File sumber memuat React + TypeScript dan harus dikompilasi dahulu. Jika sumber dibuka langsung, EcoSort sekarang menampilkan petunjuk menjalankan aplikasi alih-alih layar kosong.
+> **Catatan:** `index.html` di folder proyek adalah **file sumber** (React + TypeScript) yang harus
+> dikompilasi dulu. Kalau dibuka langsung lewat `file://` atau Live Server, EcoSort menampilkan
+> layar “sedang dimuat” lalu — bila setelah 4 detik aplikasi tidak muncul — petunjuk singkat.
+> Kalau file sumber itu dibuka dari `*.github.io`, halaman **langsung dialihkan** ke versi build di
+> `docs/`, jadi pengunjung situs tidak pernah melihat layar tersebut.
 
 ### A. Mode pengembangan
 
@@ -246,25 +268,42 @@ siapa saja.
 
 ## 8. Deploy ke GitHub Pages
 
-1. Build situs:
-   ```bash
-   npm run build
-   ```
-2. Buat repository baru, misalnya `ecosort`, lalu unggah **isi folder `dist/`**:
-   ```bash
-   cd dist
-   git init
-   git add index.html
-   git commit -m "Rilis EcoSort ke GitHub Pages"
-   git branch -M main
-   git remote add origin https://github.com/USERNAME/ecosort.git
-   git push -u origin main
-   ```
-3. Buka **Settings → Pages**, pilih **Deploy from a branch** → `main` → folder `/ (root)` → Save.
-4. Situs tampil di `https://USERNAME.github.io/ecosort/`.
+Situs ini memakai mode **Deploy from a branch → `main` → `/ (root)`**, jadi seluruh isi repository
+bisa diakses publik. Hasil build diletakkan di folder **`docs/`** dan diperbarui otomatis oleh
+GitHub Actions (file workflow: `.github/workflows/deploy-pages.yml`).
 
-> Karena hasil build berupa **satu file `index.html`** dengan CSS & JS ter-inline dan seluruh aset
-> memakai path relatif, tidak perlu mengatur base path khusus dan tidak ada aset yang 404.
+### A. Otomatis (cara yang dipakai sekarang) — tidak perlu mengutak-atik apa pun
+
+1. Push atau merge perubahan ke branch `main`.
+2. Workflow **“Build & Publish GitHub Pages”** berjalan di tab **Actions**: `npm ci` → `npm run build`
+   → salin `dist/index.html` ke `docs/index.html` → commit & push balik ke `main`.
+3. Situs langsung diperbarui di:
+   - **`https://miftahulanam95.github.io/eco-sort/`** (pengunjung otomatis diarahkan ke `docs/`), atau
+   - **`https://miftahulanam95.github.io/eco-sort/docs/`** (alamat langsungnya).
+4. Ingin memicu build ulang tanpa push? Buka tab **Actions** → **Build & Publish GitHub Pages** →
+   **Run workflow** → **Run workflow**.
+
+### B. Manual (cadangan bila Actions tidak tersedia)
+
+```bash
+npm install
+npm run build            # menghasilkan dist/index.html
+mkdir -p docs && cp dist/index.html docs/index.html
+git add docs/index.html
+git commit -m "build: perbarui hasil build GitHub Pages"
+git push origin main
+```
+
+Lalu pastikan **Settings → Pages** → **Deploy from a branch** → branch `main`, folder `/ (root)`.
+
+### C. Catatan penting
+
+- Hasil build berupa **satu file `index.html`** dengan CSS & JS ter-inline dan seluruh aset memakai
+  path relatif, jadi tidak perlu mengatur base path khusus dan tidak ada aset yang 404.
+- Folder `dist/` tetap ada di `.gitignore`; yang di-commit ke repository hanya `docs/`
+  (salinan hasil build yang benar-benar dipublikasikan).
+- Bila suatu saat mode Pages diubah ke **GitHub Actions**, workflow-nya tinggal ditambah langkah
+  `actions/upload-pages-artifact` + `actions/deploy-pages`, dan folder `docs/` tidak lagi dipakai.
 
 ---
 

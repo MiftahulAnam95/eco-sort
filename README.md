@@ -120,11 +120,13 @@ dipisah ke file berbeda sehingga mudah dipindahkan ke versi HTML/CSS/JS murni.
 
 ## 3. Cara Menjalankan
 
+> **Penting:** jangan membuka `index.html` di folder proyek langsung lewat `file://` atau VS Code Live Server. File sumber memuat React + TypeScript dan harus dikompilasi dahulu. Jika sumber dibuka langsung, EcoSort sekarang menampilkan petunjuk menjalankan aplikasi alih-alih layar kosong.
+
 ### A. Mode pengembangan
 
 ```bash
 npm install
-npm run dev      # buka http://localhost:5173
+npm run dev      # buka URL yang ditampilkan Vite (biasanya http://localhost:5173)
 ```
 
 ### B. Menjalankan hasil build dengan VS Code Live Server

@@ -20,13 +20,70 @@
       rel="stylesheet"
     />
     <style>
-      /* Warna dasar agar tidak ada "flash" putih/hitam saat halaman dimuat */
+      /* Warna dasar + tampilan awal agar halaman tidak kosong bila JavaScript gagal dimuat. */
       html { background: #f7f8f4; }
       html[data-theme="dim"] { background: #131a17; }
+      body { margin: 0; }
+      .boot-screen {
+        box-sizing: border-box;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        color: #202b27;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      .boot-card {
+        width: min(100%, 520px);
+        padding: 28px;
+        border: 1px solid #e4eae5;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, .92);
+        box-shadow: 0 18px 55px rgba(32, 43, 39, .09);
+      }
+      .boot-mark {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border-radius: 15px;
+        background: #176747;
+        color: #d7f36a;
+        font-size: 25px;
+      }
+      .boot-card h1 { margin: 18px 0 8px; font-size: 24px; letter-spacing: -.04em; }
+      .boot-card p, .boot-card li { color: #59665f; line-height: 1.6; }
+      .boot-card p { margin: 0; }
+      .boot-card details { margin-top: 18px; padding-top: 16px; border-top: 1px solid #e4eae5; }
+      .boot-card summary { color: #176747; font-weight: 700; cursor: pointer; }
+      .boot-card ol { padding-left: 22px; margin-bottom: 0; }
+      .boot-card code { padding: 2px 5px; border-radius: 5px; background: #eff2ec; color: #202b27; }
+      @media (prefers-reduced-motion: no-preference) {
+        .boot-mark { animation: boot-bob 1.4s ease-in-out infinite alternate; }
+        @keyframes boot-bob { to { transform: translateY(-4px); } }
+      }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root">
+      <main class="boot-screen" role="status" aria-live="polite">
+        <div class="boot-card">
+          <div class="boot-mark" aria-hidden="true">♻</div>
+          <h1>EcoSort sedang dimuat</h1>
+          <p>Jangan buka file sumber ini langsung dengan <code>file://</code> atau Live Server. React dan TypeScript perlu dikompilasi terlebih dahulu. Jika layar ini tidak berubah, ikuti langkah berikut:</p>
+          <details open>
+            <summary>Cara membuka EcoSort</summary>
+            <ol>
+              <li>Untuk pengembangan, jalankan <code>npm install</code> lalu <code>npm run dev</code>.</li>
+              <li>Untuk file siap pakai, jalankan <code>npm run build</code> lalu buka <code>dist/index.html</code>.</li>
+            </ol>
+          </details>
+        </div>
+      </main>
+      <noscript>
+        <p class="boot-screen">EcoSort membutuhkan JavaScript. Aktifkan JavaScript lalu muat ulang halaman.</p>
+      </noscript>
+    </div>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
